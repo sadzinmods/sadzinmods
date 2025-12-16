@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Key | SADZIN MODS</title>
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50; 
+            color: #ecf0f1; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            position: relative; 
+        }
+
+        .container {
+            background-color: #34495e; 
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        /* --- BOTÕES E INPUTS PADRÃO --- */
+        input[type="text"],
+        input[type="password"],
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #7f8c8d;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #44596e;
+            color: #ecf0f1;
+        }
+
+        button {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 5px; 
+        }
+        button:hover { background-color: #16a085; }
+
+        /* --- AJUSTES DO LINK DE AJUDA --- */
+        .help-link { text-align: center; margin-top: 15px; }
+        .help-link a {
+            color: #2ecc71; 
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: color 0.3s;
+        }
+        .help-link a:hover { color: #1abc9c; }
+
+
+        /* --- LAYOUT DO GERADOR --- */
+        .logged-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 25px;
+        }
+        .logged-header h2 { margin: 0; }
+        .btn-exit {
+            background-color: #e74c3c;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .btn-exit:hover { background-color: #c0392b; }
+
+        /* --- EXIBIÇÃO DE CRÉDITOS --- */
+        .credits-info {
+            background-color: #f39c12;
+            color: #2c3e50;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .credits-info strong {
+            font-size: 1.2em;
+            color: white;
+        }
+        .credits-info a {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+
+        /* --- CONTROLES DE KEY --- */
+        .btn-secondary { background-color: #3498db; }
+        .btn-secondary:hover { background-color: #2980b9; }
+        .key-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .key-controls button {
+            flex-grow: 1;
+            padding: 8px 12px;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        /* --- LISTA DE KEYS --- */
+        .key-item {
+            background-color: #3e5163;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+        .btn-editar { background-color: #f39c12; }
+        .btn-editar:hover { background-color: #e67e22; }
+
+        .key-actions button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .btn-congelar { background-color: #e67e22; }
+        .btn-congelar:hover { background-color: #d35400; }
+        
+        .btn-deletar { background-color: #e74c3c; }
+        .btn-deletar:hover { background-color: #c0392b; }
+        
+        .btn-resetar { background-color: #3498db; }
+        .btn-resetar:hover { background-color: #2980b9; }
+
+        .frozen {
+            text-decoration: line-through;
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        /* --- DRAWER (MENU LATERAL) --- */
+        #drawer {
+            height: 100%;
+            width: 0; 
+            position: fixed;
+            z-index: 10; 
+            top: 0;
+            left: 0;
+            background-color: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+        #drawer a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #ecf0f1;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            color: #1abc9c;
+        }
+
+        /* --- PAINEL ADM SEPARADO --- */
+        #admArea {
+            display: none; 
+            width: 100%;
+            max-width: 500px;
+            margin-top: 0;
+        }
+
+        .adm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .adm-header h2 {
+             color: #e67e22;
+             margin: 0;
+        }
+        .btn-back {
+            background-color: #7f8c8d;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .btn-back:hover { background-color: #95a5a6; }
+        
+        /* Estilos dentro do ADM Panel */
+        .adm-container {
+            background-color: #34495e; 
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: 15px;
+        }
+        .adm-container h4 {
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            color: #1abc9c;
+        }
+
+        .user-credit-item {
+            background-color: #3e5163;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-credit-item input {
+            width: 80px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        .user-credit-item button {
+            background-color: #e67e22;
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        /* --- ÁREA DE PERFIL --- */
+        #perfilArea {
+            display: none; 
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #perfilArea h2 {
+            color: #1abc9c;
+        }
+        .perfil-card {
+            background-color: #3e5163;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .perfil-card p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .perfil-card strong {
+            color: #f39c12;
+            font-size: 1.2em;
+        }
+        
+        /* Estilo para Histórico de Acesso */
+        .user-access-item {
+            background-color: #3e5163;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+        .user-access-item strong {
+            color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+
+    <span class="menu-icon" onclick="openNav()">&#x22EE;</span> 
+    
+    <div id="drawer">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#" onclick="openPerfil()">Meu Perfil</a>
+        <a href="#" onclick="openAdmPanel()">Painel ADM</a>
+    </div>
+
+
+    <div id="loginArea" class="container">
+        <div class="header">
+            <h2>LOGIN GERADOR DE KEY</h2>
+        </div>
+        
+        <form id="loginForm">
+            <label for="username">Usuário:</label>
+            <input type="text" id="username" required>
+            
+            <label for="password">Senha:</label>
+            <input type="password" id="password" required>
+            
+            <button type="submit">Entrar</button>
+            <div id="loginMessage" class="login-message"></div>
+        </form>
+        
+        <div class="help-link">
+            <a href="https://wa.me/message/LW5W2NLUABM3J1" target="_blank">
+                Não sabe o login? Fale conosco
+            </a>
+        </div>
+    </div>
+
+    <div id="geradorArea" class="container" style="display: none;">
+        
+        <div class="logged-header">
+            <h2 id="welcomeMessage">SADZIN MODS | GERADOR DE KEY</h2>
+            <button class="btn-exit" onclick="logout()">Sair</button>
+        </div>
+
+        <div id="userCreditsDisplay" class="credits-info">
+            Você possui <strong>0</strong> créditos.
+        </div>
+
+        <div class="gerador-container">
+            <h3>Crie uma key</h3>
+            <form id="keyGeneratorForm">
+
+                <div class="key-input-group">
+                    <label for="keyKey">Key:</label>
+                    <input type="text" id="keyKey" placeholder="Digite ou gere a Key" required>
+                </div>
+                
+                <div class="key-controls">
+                    <button type="button" class="btn-secondary" onclick="generateRandomKeyToInput('sadzinmods')">sadzinmods + 9 Nº</button>
+                    <button type="button" class="btn-secondary" onclick="generateRandomKeyToInput('sadzin')">sadzin + 9 Nº</button>
+                </div>
+
+                <label for="keyDays">Quantos dias:</label>
+                <select id="keyDays" required>
+                    <option value="" disabled selected>Selecione os dias</option>
+                    <option value="1">1 dia (5 Créditos)</option>
+                    <option value="3">3 dias (10 Créditos)</option>
+                    <option value="7">7 dias (15 Créditos)</option>
+                    <option value="15">15 dias (20 Créditos)</option>
+                    <option value="30">30 dias (40 Créditos)</option>
+                </select>
+
+                <label for="keyDevices">Dispositivos:</label>
+                <input type="number" id="keyDevices" value="1" min="1" required>
+
+                <button type="submit">GERAR KEY</button>
+                <div id="keyGeneratorMessage" class="key-message"></div>
+            </form>
+            
+            <div id="generatedKeyOutput" class="key-output" style="display: none;"></div>
+        </div>
+
+        <div id="keysGeradas">
+            <h3>Keys geradas</h3>
+            <div id="keysList">
+                <p style="text-align: center; color: #7f8c8d;">Nenhuma key gerada ainda.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="admArea" class="container">
+        <div class="adm-header">
+            <h2>🔑 Painel ADM</h2>
+            <button class="btn-back" onclick="closeAdmPanel()">Voltar</button>
+        </div>
+
+        <div class="adm-container">
+            <h4>Gerenciar Créditos</h4>
+            <div id="creditManagementList">
+                </div>
+            
+            <h4>Criar Novo Usuário de Login</h4>
+            <form id="createUserForm">
+                <label for="newUsername">Novo Usuário:</label>
+                <input type="text" id="newUsername" required>
+                
+                <label for="newPassword">Nova Senha:</label>
+                <input type="text" id="newPassword" required>
+                
+                <button type="submit">CRIAR CREDENCIAL</button>
+                <div id="createUserMessage" class="key-message"></div>
+            </form>
+            
+            <h4>Gerenciar Credenciais</h4>
+            <div id="credentialList"></div>
+            
+            <h4>Histórico de Acessos ao Gerador</h4>
+            <div id="accessHistoryList"></div>
+        </div>
+    </div>
+    
+    <div id="perfilArea" class="container">
+        <div class="adm-header">
+            <h2>👤 Meu Perfil</h2>
+            <button class="btn-back" onclick="closePerfil()">Voltar</button>
+        </div>
+        <div id="perfilContent" class="perfil-card">
+            </div>
+    </div>
+
+    <div class="footer">
+        BY:SADZIN MODS
+    </div>
+
+    <script>
+        // *** NOVO VALOR DA SENHA ADM ***
+        const ADM_PASS = '0904'; 
+        
+        // Custo das chaves em Créditos
+        const COST_MAP = {
+            '1': 5, '3': 10, '7': 15, '15': 20, '30': 40
+        };
+
+        let currentUser = null; 
+        
+        function initializeUserCredentials() {
+            let credentials = JSON.parse(localStorage.getItem('user_credentials'));
+            
+            if (!credentials || credentials.length === 0) {
+                // Usuário padrão de emergência
+                credentials = [{ user: 'sadzin', pass: 'mods', credits: 9999 }];
+            } else {
+                credentials = credentials.map(cred => ({
+                    ...cred,
+                    credits: cred.credits === undefined ? 0 : cred.credits 
+                }));
+            }
+            return credentials;
+        }
+
+        let userCredentials = initializeUserCredentials();
+        let accessLog = JSON.parse(localStorage.getItem('adm_access_log')) || [];
+        let generatedKeys = JSON.parse(localStorage.getItem('sadzin_keys')) || [];
+
+        // --- Elementos do DOM ---
+        const loginArea = document.getElementById('loginArea');
+        const geradorArea = document.getElementById('geradorArea');
+        const admArea = document.getElementById('admArea');
+        const perfilArea = document.getElementById('perfilArea');
+        const perfilContent = document.getElementById('perfilContent');
+        const loginForm = document.getElementById('loginForm');
+        const keysList = document.getElementById('keysList');
+        const keyKeyInput = document.getElementById('keyKey'); 
+        const userCreditsDisplay = document.getElementById('userCreditsDisplay');
+        const generatedKeyOutput = document.getElementById('generatedKeyOutput'); 
+        const accessHistoryList = document.getElementById('accessHistoryList');
+        const creditManagementList = document.getElementById('creditManagementList');
+        const credentialList = document.getElementById('credentialList');
+
+
+        // --- FUNÇÕES GERAIS DE SALVAMENTO ---
+        function saveCredentials() {
+            localStorage.setItem('user_credentials', JSON.stringify(userCredentials));
+        }
+        
+        function saveKeys() {
+            localStorage.setItem('sadzin_keys', JSON.stringify(generatedKeys));
+        }
+
+        // --- FUNÇÕES DE UTENSÍLIOS ---
+
+        function getFormattedTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('pt-BR');
+            const date = now.toLocaleDateString('pt-BR');
+            return `${date} ${time}`;
+        }
+        
+        function updateCreditsDisplay() {
+            if (currentUser && currentUser.credits !== undefined) {
+                const credits = currentUser.credits;
+                userCreditsDisplay.innerHTML = `Você possui <strong>${credits}</strong> créditos.`;
+                
+                if (credits <= 0) {
+                     userCreditsDisplay.innerHTML += `
+                        <br>Por favor, recarregue e tente novamente.
+                        <br>Acesse:<a href="https://wa.me/message/LW5W2NLUABM3J1" target="_blank"> compre com nossos vendedores ofc</a>
+                    `;
+                }
+            }
+        }
+        
+        function clearKeyOutput() {
+            generatedKeyOutput.style.display = 'none';
+            generatedKeyOutput.innerHTML = '';
+            document.getElementById('keyGeneratorMessage').textContent = '';
+        }
+
+        // --- LÓGICA DO DRAWER, ADM E PERFIL (Controle de Visibilidade) ---
+        
+        function openNav() {
+            document.getElementById("drawer").style.width = "250px";
+        }
+        window.openNav = openNav;
+
+        function closeNav() {
+            document.getElementById("drawer").style.width = "0";
+        }
+        window.closeNav = closeNav;
+        
+        function openPerfil() {
+            closeNav();
+            if (currentUser) {
+                geradorArea.style.display = 'none';
+                admArea.style.display = 'none';
+                perfilArea.style.display = 'block';
+                perfilContent.innerHTML = `
+                    <p>Usuário Logado: <strong>${currentUser.user}</strong></p>
+                    <p>Créditos Atuais: <strong>${currentUser.credits}</strong></p>
+                `;
+            } else {
+                alert("Nenhum usuário logado.");
+            }
+        }
+        window.openPerfil = openPerfil;
+        
+        function closePerfil() {
+            perfilArea.style.display = 'none';
+            geradorArea.style.display = 'block';
+        }
+        window.closePerfil = closePerfil;
+
+        function openAdmPanel() {
+            closeNav(); 
+            
+            const password = prompt("Digite a senha ADM para acessar o painel:");
+            
+            if (password === ADM_PASS) {
+                geradorArea.style.display = 'none';
+                perfilArea.style.display = 'none'; 
+                admArea.style.display = 'block';
+                logAccess("Acesso ADM bem-sucedido");
+                renderAccessLog();
+                renderCredentials();
+                renderCreditManagement(); 
+            } else {
+                alert("Senha ADM incorreta!");
+                logAccess("Tentativa de acesso ADM falhou");
+            }
+        }
+        window.openAdmPanel = openAdmPanel;
+        
+        function closeAdmPanel() {
+            admArea.style.display = 'none';
+            geradorArea.style.display = 'block';
+        }
+        window.closeAdmPanel = closeAdmPanel;
+
+        // --- RASTREAMENTO DE ACESSOS (CORRIGIDO: O log é de acesso ao Gerador) ---
+        function logAccess(status) {
+            const logEntry = { status: status, time: getFormattedTime() };
+            accessLog.unshift(logEntry); 
+            localStorage.setItem('adm_access_log', JSON.stringify(accessLog));
+        }
+        
+        function renderAccessLog() {
+            accessHistoryList.innerHTML = '';
+            if (accessLog.length === 0) {
+                accessHistoryList.innerHTML = '<p style="font-size: 0.9em; color: #bdc3c7;">Nenhum registro de acesso ao Gerador ainda.</p>';
+                return;
+            }
+            accessLog.forEach(log => {
+                const item = document.createElement('div');
+                item.className = 'user-access-item';
+                item.innerHTML = `[${log.time}] <strong>${log.status}</strong>`;
+                accessHistoryList.appendChild(item);
+            });
+        }
+        
+        // --- GERENCIAMENTO DE CRÉDITOS (CORRIGIDO: Renderização do Salvar) ---
+        
+        function renderCreditManagement() {
+            creditManagementList.innerHTML = '';
+            
+            userCredentials.forEach((cred, index) => {
+                const item = document.createElement('div');
+                item.className = 'user-credit-item';
+                item.innerHTML = `
+                    <span>
+                        <strong>${cred.user}:</strong>
+                        <span id="creditsValue-${index}">${cred.credits}</span> Créditos
+                    </span>
+                    <div style="display:flex; align-items:center;">
+                        <input type="number" id="creditInput-${index}" value="${cred.credits}" min="0">
+                        <button onclick="updateUserCredits(${index})">Salvar</button>
+                    </div>
+                `;
+                creditManagementList.appendChild(item);
+            });
+        }
+        
+        function updateUserCredits(index) {
+            const inputElement = document.getElementById(`creditInput-${index}`);
+            const newCredits = parseInt(inputElement.value);
+            
+            if (isNaN(newCredits) || newCredits < 0) {
+                alert("Por favor, insira um número de crédito válido (0 ou mais).");
+                return;
+            }
+            
+            userCredentials[index].credits = newCredits;
+            saveCredentials();
+            renderCreditManagement();
+            renderCredentials(); 
+            
+            if (currentUser && currentUser.user === userCredentials[index].user) {
+                currentUser.credits = newCredits;
+                updateCreditsDisplay();
+            }
+            
+            alert(`Créditos de ${userCredentials[index].user} atualizados para ${newCredits}.`);
+        }
+        window.updateUserCredits = updateUserCredits;
+
+
+        // --- LÓGICA DE GERENCIAMENTO DE CREDENCIAIS (CORRIGIDO: Renderização do Deletar) ---
+        
+        document.getElementById('createUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const createUserMessage = document.getElementById('createUserMessage');
+            
+            if (userCredentials.some(cred => cred.user === newUsername)) {
+                createUserMessage.textContent = 'Erro: Usuário já existe!';
+                createUserMessage.style.color = '#e74c3c';
+                return;
+            }
+            
+            userCredentials.push({ user: newUsername, pass: newPassword, credits: 0 }); 
+            saveCredentials();
+            renderCredentials();
+            renderCreditManagement(); 
+
+            createUserMessage.textContent = `Usuário ${newUsername} criado com sucesso (0 Créditos)!`;
+            createUserMessage.style.color = '#2ecc71';
+            
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+        });
+
+        function renderCredentials() {
+            credentialList.innerHTML = '';
+            userCredentials.forEach((cred, index) => {
+                const item = document.createElement('div');
+                item.className = 'key-item';
+                item.innerHTML = `
+                    <div class="key-info">
+                        Usuário: <strong>${cred.user}</strong> | Senha: ${cred.pass} | Créditos: ${cred.credits}
+                    </div>
+                    <div class="key-actions">
+                        <button class="btn-deletar" onclick="deleteCredential(${index})">DELETAR</button>
+                    </div>
+                `;
+                credentialList.appendChild(item);
+            });
+        }
+
+        function deleteCredential(index) {
+            if (userCredentials.length === 1) {
+                alert("Erro: Você não pode deletar o único usuário existente.");
+                return;
+            }
+            if (confirm(`Tem certeza que deseja DELETAR o usuário ${userCredentials[index].user}?`)) {
+                userCredentials.splice(index, 1);
+                saveCredentials();
+                renderCredentials();
+                renderCreditManagement(); 
+            }
+        }
+        window.deleteCredential = deleteCredential;
+
+
+        // --- LÓGICA DE LOGIN ---
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginMessage = document.getElementById('loginMessage');
+            
+            const foundUser = userCredentials.find(cred => cred.user === username && cred.pass === password);
+
+            if (foundUser) {
+                currentUser = foundUser; 
+                loginMessage.textContent = '';
+                loginArea.style.display = 'none';
+                geradorArea.style.display = 'block';
+                admArea.style.display = 'none'; 
+                perfilArea.style.display = 'none';
+
+                clearKeyOutput(); 
+                
+                generatedKeys = JSON.parse(localStorage.getItem('sadzin_keys')) || [];
+                renderKeys();
+                updateCreditsDisplay(); 
+                
+                logAccess(`Login bem-sucedido: ${username}`);
+
+            } else {
+                loginMessage.textContent = 'Usuário ou Senha incorretos!';
+                loginMessage.style.color = '#e74c3c';
+                logAccess(`Tentativa de login falhou (User: ${username})`);
+            }
+        });
+
+        // --- FUNÇÕES DE CHAVE E SAIR ---
+
+        function logout() {
+            if (confirm("Tem certeza que deseja sair?")) {
+                currentUser = null; 
+                geradorArea.style.display = 'none';
+                admArea.style.display = 'none'; 
+                perfilArea.style.display = 'none'; 
+                loginArea.style.display = 'block';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('loginMessage').textContent = '';
+                
+                clearKeyOutput(); 
+                
+                logAccess("Logout");
+                alert("Você saiu do sistema.");
+            }
+        }
+        window.logout = logout; 
+
+        // --- LÓGICA DE GERAÇÃO E AÇÕES DE CHAVE (Mantidas e Funcionais) ---
+        
+        function generateRandomNumber(length = 9) {
+            let result = '';
+            const characters = '0123456789';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+        
+        function generateRandomKeyWithPrefix(prefix) {
+            return prefix + generateRandomNumber(9); 
+        }
+
+        function generateRandomKeyToInput(prefix) {
+            keyKeyInput.value = generateRandomKeyWithPrefix(prefix);
+        }
+        window.generateRandomKeyToInput = generateRandomKeyToInput; 
+        
+        function getCost(days) {
+            return COST_MAP[days] || 0;
+        }
+        
+        function calculateExpiryDate(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + parseInt(days));
+            return date;
+        }
+
+        function formatExpiryDate(date) {
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0'); 
+            const year = d.getFullYear();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} às ${hours}:${minutes}`;
+        }
+
+        function copyKey(key) {
+            navigator.clipboard.writeText(key)
+                .then(() => { alert(`Key ${key} copiada com sucesso!`); })
+                .catch(err => { console.error('Erro ao copiar a key: ', err); alert('Erro ao copiar a key. Tente copiar manualmente.'); });
+        }
+        window.copyKey = copyKey; 
+
+        function editKey(index) {
+            const currentKey = generatedKeys[index];
+            const newKeyValue = prompt(`Editar Key (atual: ${currentKey.key}):`, currentKey.key);
+            if (newKeyValue === null) return; 
+            const newDaysValue = prompt(`Editar Dias (atual: ${currentKey.days}):`, currentKey.days);
+            if (newDaysValue === null) return; 
+            const newDevicesValue = prompt(`Editar Dispositivos (atual: ${currentKey.devices}):`, currentKey.devices);
+            if (newDevicesValue === null) return; 
+            if (newKeyValue.trim() === '' || isNaN(newDaysValue) || isNaN(newDevicesValue) || parseInt(newDaysValue) <= 0 || parseInt(newDevicesValue) <= 0) {
+                 alert("Erro: Valores inválidos ou vazios fornecidos.");
+                 return;
+            }
+            const keyExists = generatedKeys.some((key, i) => key.key === newKeyValue && i !== index);
+            if (keyExists) {
+                alert(`ERRO: A Key ${newKeyValue} já existe em outra entrada!`);
+                return;
+            }
+            generatedKeys[index].key = newKeyValue.trim();
+            generatedKeys[index].days = parseInt(newDaysValue);
+            generatedKeys[index].devices = parseInt(newDevicesValue);
+            saveKeys();
+            renderKeys();
+            alert(`Key ${newKeyValue} editada com sucesso!`);
+        }
+        window.editKey = editKey;
+        
+        function renderKeys() {
+            keysList.innerHTML = ''; 
+            if (generatedKeys.length === 0) {
+                keysList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Nenhuma key gerada ainda.</p>';
+                return;
+            }
+            generatedKeys.forEach((item, index) => {
+                const expiryString = formatExpiryDate(item.expiryDate);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'key-item';
+                if (item.isFrozen) { itemDiv.classList.add('frozen'); }
+                itemDiv.innerHTML = `
+                    <div class="key-info">
+                        <strong>${item.key}</strong>
+                        ${item.isFrozen ? ' (CONGELADA)' : ''}
+                        = ${item.days} dia${item.days > 1 ? 's' : ''}
+                        = Expira em ${expiryString}
+                        (Disp: ${item.devices})
+                    </div>
+                    <div class="key-actions">
+                        <button class="btn-editar" onclick="editKey(${index})">EDITAR KEY</button>
+                        <button class="btn-congelar" onclick="toggleFreezeKey(${index})">
+                            ${item.isFrozen ? 'DESCONGELAR' : 'CONGELAR KEY'}
+                        </button>
+                        <button class="btn-deletar" onclick="deleteKey(${index})">DELETAR KEY</button>
+                        <button class="btn-resetar" onclick="resetKey(${index})">RESETAR KEY</button>
+                    </div>
+                `;
+                keysList.appendChild(itemDiv);
+            });
+        }
+        
+        function toggleFreezeKey(index) {
+            generatedKeys[index].isFrozen = !generatedKeys[index].isFrozen;
+            saveKeys();
+            renderKeys();
+        }
+        window.toggleFreezeKey = toggleFreezeKey;
+
+        function deleteKey(index) {
+            if (confirm(`Tem certeza que deseja DELETAR a key ${generatedKeys[index].key}?`)) {
+                generatedKeys.splice(index, 1); 
+                saveKeys();
+                renderKeys();
+            }
+        }
+        window.deleteKey = deleteKey;
+
+        function resetKey(index) {
+            if (confirm(`Tem certeza que deseja RESETAR a key ${generatedKeys[index].key}?`)) {
+                const days = generatedKeys[index].days;
+                generatedKeys[index].expiryDate = calculateExpiryDate(days);
+                generatedKeys[index].isFrozen = false; 
+                saveKeys();
+                renderKeys();
+                alert(`Key ${generatedKeys[index].key} resetada e nova data de expiração definida!`);
+            }
+        }
+        window.resetKey = resetKey;
+
+        document.getElementById('keyGeneratorForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const days = document.getElementById('keyDays').value;
+            const devices = document.getElementById('keyDevices').value;
+            let newKey = keyKeyInput.value.trim(); 
+            const user = currentUser ? currentUser.user : 'unknown';
+
+            clearKeyOutput(); 
+
+            if (!days || !newKey || !/^[a-zA-Z0-9]+$/.test(newKey)) {
+                document.getElementById('keyGeneratorMessage').textContent = 'Preencha todos os campos e use apenas letras/números na Key.';
+                document.getElementById('keyGeneratorMessage').style.color = '#e74c3c';
+                return;
+            }
+            
+            const cost = getCost(days);
+            
+            if (!currentUser || currentUser.credits < cost) {
+                document.getElementById('keyGeneratorMessage').innerHTML = `
+                    ERRO: Você precisa de ${cost} créditos. Você possui apenas ${currentUser ? currentUser.credits : 0}.
+                    <br>Acesse:<a href="https://wa.me/message/LW5W2NLUABM3J1" target="_blank"> compre com nossos vendedores ofc</a>
+                `;
+                document.getElementById('keyGeneratorMessage').style.color = '#e74c3c';
+                return;
+            }
+
+            const keyExists = generatedKeys.some(key => key.key === newKey);
+            if (keyExists) {
+                document.getElementById('keyGeneratorMessage').textContent = `ERRO: A Key ${newKey} já existe! Tente outra.`;
+                document.getElementById('keyGeneratorMessage').style.color = '#e74c3c';
+                return;
+            }
+            
+            // Dedução de Créditos
+            currentUser.credits -= cost;
+            const userIndex = userCredentials.findIndex(cred => cred.user === currentUser.user);
+            if (userIndex !== -1) {
+                userCredentials[userIndex].credits = currentUser.credits;
+                saveCredentials();
+                updateCreditsDisplay();
+            }
+
+            // Geração da Key
+            const expiryDate = calculateExpiryDate(days);
+            
+            const keyObject = { key: newKey, days: days, devices: devices, user: user, expiryDate: expiryDate, isFrozen: false };
+
+            generatedKeys.unshift(keyObject); 
+            saveKeys();
+
+            generatedKeyOutput.innerHTML = `
+                <p class="key-message success">KEY GERADA COM SUCESSO (Custo: ${cost} Créditos)</p>
+                <strong>${days} DIA${days > 1 ? 'S' : ''} KEY: ${newKey}</strong>
+                <button type="button" onclick="copyKey('${newKey}')">Copiar key</button>
+            `;
+            generatedKeyOutput.style.display = 'block';
+
+            document.getElementById('keyGeneratorMessage').textContent = '';
+            renderKeys();
+
+            document.getElementById('keyDays').value = '';
+            keyKeyInput.value = '';
+        });
+
+        function loadKeys() {
+            generatedKeys = JSON.parse(localStorage.getItem('sadzin_keys')) || [];
+            if (geradorArea.style.display === 'block') {
+                renderKeys();
+            }
+        }
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', loadKeys);
+        document.addEventListener('DOMContentLoaded', clearKeyOutput);
+    </script>
+</body>
+</html>
